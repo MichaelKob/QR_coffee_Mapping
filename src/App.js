@@ -6,9 +6,11 @@ import './App.css';
 function App() {
   const [coffeeSpots, setCoffeeSpots] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleLocationSubmit = async (location) => {
     setLoading(true);
+    setError(null);
     const spots = await fetchCoffeeSpots(location);
     setCoffeeSpots(spots);
     setLoading(false);
@@ -25,6 +27,7 @@ function App() {
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
+      setError('Failed to fetch coffee spots. Please try again later.');
       return [];
     }
   };
@@ -41,6 +44,10 @@ function App() {
             {loading ? (
               <Box display="flex" justifyContent="center" alignItems="center" height="100px">
                 <Spinner size="xl" />
+              </Box>
+            ) : error ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="100px">
+                <Text color="red.500">{error}</Text>
               </Box>
             ) : (
               coffeeSpots.length > 0 && (
