@@ -19,7 +19,6 @@ app.get('/search', async (req, res) => {
 
     const response = await axios.get(searchUrl);
     const html = response.data;
-    console.log(html); // Temporary debugging statement to log the HTML content
     const $ = cheerio.load(html);
 
     const results = [];
