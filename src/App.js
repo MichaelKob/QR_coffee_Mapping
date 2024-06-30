@@ -16,7 +16,7 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`http://localhost:3001/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`/search?location=${encodeURIComponent(location)}`);
       const data = await response.json();
       return data.results.map(result => ({
         title: result.title,
