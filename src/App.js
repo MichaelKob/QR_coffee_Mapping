@@ -16,7 +16,7 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
       const data = await response.json();
       return data.results.map(result => ({
         title: result.title,
