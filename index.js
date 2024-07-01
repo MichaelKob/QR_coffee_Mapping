@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const cheerio = require('cheerio');
 const cors = require('cors');
 const winston = require('winston');
 const app = express();
@@ -30,29 +29,16 @@ app.post('/search', async (req, res) => {
   }
 
   try {
-    // Hardcoded list of park names
-    const parkNames = [
-      "Barretto Point Park",
-      "Bronx Park",
-      "Claremont Park",
-      "Concrete Plant Park",
-      "Crotona Park",
-      "Ferry Point Park",
-      "Franz Sigel Park",
-      "Joyce Kilmer Park",
-      "Macombs Dam Park",
-      "Mill Pond Park",
-      "Pelham Bay Park",
-      "Rev. T. Wendell Foster Park And Recreation Center",
-      "Soundview Park",
-      "St. James Park",
-      "St. Mary's Park",
-      "Van Cortlandt Park",
-      "Williamsbridge Oval"
-    ];
+    // Use Google Maps Places API to search for public places to enjoy coffee
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
+    const { data } = await axios.get(searchUrl);
+
+    // Extract names of locations from search results
+    const locationNames = data.results.map(result => result.name);
 
     // Limit results to top 10
-    const topResults = parkNames.slice(0, 10).map(name => ({ locationName: name }));
+    const topResults = locationNames.slice(0, 10).map(name => ({ locationName: name }));
 
     res.json({ results: topResults });
   } catch (error) {
