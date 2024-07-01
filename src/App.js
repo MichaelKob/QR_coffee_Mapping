@@ -82,7 +82,7 @@ function App() {
                     <ul>
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
-                          <span style={{ fontSize: '1.2rem', color: '#3182ce' }}>
+                          <span style={{ fontSize: '1.2rem', color: '#000' }}>
                             {spot.locationName}
                           </span>
                         </li>
