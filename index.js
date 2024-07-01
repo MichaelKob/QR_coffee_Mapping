@@ -16,7 +16,7 @@ app.get('/search', async (req, res) => {
   }
 
   try {
-    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location} site:tripadvisor.com`;
+    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location}`;
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
 
     const response = await axios.get(searchUrl);
@@ -57,12 +57,13 @@ app.post('/process', async (req, res) => {
 
   try {
     const chatgptApiKey = process.env.CHATGPT_API_KEY;
-    const chatgptUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+    const chatgptUrl = 'https://api.openai.com/v1/chat/completions';
 
     const response = await axios.post(
       chatgptUrl,
       {
-        prompt: `Extract the names of the top 10 places to enjoy coffee from the following content:\n\n${websiteContent}\n\nNames:`,
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: `Extract the names of the top 10 places to enjoy coffee from the following content:\n\n${websiteContent}\n\nNames:` }],
         max_tokens: 150,
         n: 1,
         stop: ["\n"],
@@ -75,8 +76,11 @@ app.post('/process', async (req, res) => {
       }
     );
 
-    const suggestions = response.data.choices[0].text.trim().split('\n').slice(0, 10);
-    res.json({ suggestions });
+    const suggestions = response.data.choices[0].message.content.trim().split('\n').slice(0, 10);
+    const googleMapsLinks = suggestions.map(suggestion => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion)}`);
+    const results = suggestions.map((suggestion, index) => ({ name: suggestion, link: googleMapsLinks[index] }));
+
+    res.json({ results });
   } catch (error) {
     console.error('Error processing website content:', error);
     res.status(500).json({ error: 'Failed to process website content' });
