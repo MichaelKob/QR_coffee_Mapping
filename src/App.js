@@ -32,6 +32,10 @@ function App() {
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       setError('Failed to fetch coffee spots. Please try again later.');
       return [];
     }
@@ -50,6 +54,10 @@ function App() {
       return data.suggestions;
     } catch (error) {
       console.error('Error processing website content:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       setError('Failed to process website content. Please try again later.');
       return [];
     }
@@ -82,7 +90,7 @@ function App() {
                     <ul>
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
-                          <span style={{ fontSize: '1.2rem', color: '#3182ce' }}>
+                          <span style={{ fontSize: '1.2rem', color: '#000' }}>
                             {spot.locationName}
                           </span>
                         </li>
