@@ -56,27 +56,26 @@ app.post('/process', async (req, res) => {
   }
 
   try {
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    const geminiUrl = 'https://language.googleapis.com/v1/documents:analyzeEntities?key=' + geminiApiKey;
+    const chatgptApiKey = process.env.CHATGPT_API_KEY;
+    const chatgptUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
 
     const response = await axios.post(
-      geminiUrl,
+      chatgptUrl,
       {
-        document: {
-          type: 'PLAIN_TEXT',
-          content: websiteContent,
-        },
-        encodingType: 'UTF8',
+        prompt: `Extract the names of the top 10 places to enjoy coffee from the following content:\n\n${websiteContent}\n\nNames:`,
+        max_tokens: 150,
+        n: 1,
+        stop: ["\n"],
       },
       {
         headers: {
-        'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${chatgptApiKey}`,
         },
       }
     );
 
-    const entities = response.data.entities;
-    const suggestions = entities.map(entity => entity.name).slice(0, 10);
+    const suggestions = response.data.choices[0].text.trim().split('\n').slice(0, 10);
     res.json({ suggestions });
   } catch (error) {
     console.error('Error processing website content:', error);
