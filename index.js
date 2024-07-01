@@ -28,11 +28,26 @@ app.post('/search', async (req, res) => {
     return res.status(400).json({ error: 'Location is required' });
   }
 
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
+
+  const makeRequest = async (url, retries = 3) => {
+    try {
+      const { data } = await axios.get(url);
+      return data;
+    } catch (error) {
+      if (error.response && error.response.status === 429 && retries > 0) {
+        const delay = Math.pow(2, 3 - retries) * 1000; // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return makeRequest(url, retries - 1);
+      } else {
+        throw error;
+      }
+    }
+  };
+
   try {
-    // Use Google Maps Places API to search for public places to enjoy coffee
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
-    const { data } = await axios.get(searchUrl);
+    const data = await makeRequest(searchUrl);
 
     // Extract names of locations from search results
     const locationNames = data.results.map(result => result.name);
