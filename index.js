@@ -27,11 +27,20 @@ app.get('/search', async (req, res) => {
       const link = $(element).attr('href');
       const description = $(element).find('.VwiC3b').text(); // Extracting description
       if (title && link && !title.includes('Yelp') && !link.includes('yelp.com')) {
-        results.push({ title, link, description });
+        // Extracting the actual location name and Google Maps link
+        const locationName = title;
+        const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
+        // Ensure the link is a direct Google Maps link
+        if (googleMapsLink.includes('google.com/maps') && !link.includes('search')) {
+          results.push({ locationName, googleMapsLink, description });
+        }
       }
     });
 
-    res.json({ results });
+    // Limit results to top 10
+    const topResults = results.slice(0, 10);
+
+    res.json({ results: topResults });
   } catch (error) {
     console.error('Error fetching search results:', error);
     res.status(500).json({ error: 'Failed to fetch search results' });
