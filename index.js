@@ -24,22 +24,17 @@ app.get('/search', async (req, res) => {
     const results = [];
     $('a').each((index, element) => {
       const title = $(element).find('h3').text();
-      const link = $(element).attr('href');
       const description = $(element).find('.VwiC3b').text(); // Extracting description
-      if (title && link && !title.includes('Yelp') && !link.includes('yelp.com')) {
-        // Extracting the actual location name and Google Maps link
+      if (title && !title.includes('Yelp')) {
+        // Extracting the actual location name
         const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
-        const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
-        // Ensure the link is a direct Google Maps link
-        if (googleMapsLink.includes('google.com/maps')) {
-          results.push({ locationName, googleMapsLink, description });
-        }
+        results.push({ locationName, description });
       }
     });
 
-    // Deduplicate results based on locationName and googleMapsLink
+    // Deduplicate results based on locationName
     const uniqueResults = results.filter((result, index, self) =>
-      index === self.findIndex((r) => r.locationName === result.locationName && r.googleMapsLink === result.googleMapsLink)
+      index === self.findIndex((r) => r.locationName === result.locationName)
     );
 
     // Limit results to top 10
