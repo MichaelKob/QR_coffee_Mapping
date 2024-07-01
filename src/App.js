@@ -23,10 +23,8 @@ function App() {
     try {
       const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
       const data = await response.json();
-      const websiteContent = data.results.map(result => result.description).join('\n');
-      const suggestions = await processWebsiteContent(websiteContent);
-      return suggestions.map(suggestion => ({
-        locationName: suggestion,
+      return data.results.map(result => ({
+        locationName: result.locationName,
         googleMapsLink: '',
         description: ''
       }));
@@ -37,28 +35,6 @@ function App() {
         console.error('Response data:', error.response.data);
       }
       setError('Failed to fetch coffee spots. Please try again later.');
-      return [];
-    }
-  };
-
-  const processWebsiteContent = async (websiteContent) => {
-    try {
-      const response = await fetch('https://find-coffee-spots-wh4w4z73.devinapps.com/process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ websiteContent })
-      });
-      const data = await response.json();
-      return data.suggestions;
-    } catch (error) {
-      console.error('Error processing website content:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
-      setError('Failed to process website content. Please try again later.');
       return [];
     }
   };
