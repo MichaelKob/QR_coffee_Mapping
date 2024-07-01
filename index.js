@@ -22,8 +22,8 @@ const logger = winston.createLogger({
 app.use(cors());
 app.use(express.json());
 
-app.post('/search', async (req, res) => {
-  const location = req.body.location;
+app.get('/search', async (req, res) => {
+  const location = req.query.location;
   if (!location) {
     return res.status(400).json({ error: 'Location is required' });
   }
