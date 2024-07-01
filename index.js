@@ -31,13 +31,13 @@ app.post('/search', async (req, res) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
 
-  const makeRequest = async (url, retries = 3) => {
+  const makeRequest = async (url, retries = 5) => {
     try {
       const { data } = await axios.get(url);
       return data;
     } catch (error) {
       if (error.response && error.response.status === 429 && retries > 0) {
-        const delay = Math.pow(2, 3 - retries) * 1000; // Exponential backoff
+        const delay = Math.pow(2, 5 - retries) * 1000; // Increased exponential backoff
         await new Promise(resolve => setTimeout(resolve, delay));
         return makeRequest(url, retries - 1);
       } else {
