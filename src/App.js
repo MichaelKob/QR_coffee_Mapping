@@ -14,7 +14,10 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`https://find-coffee-places-app-sdppl1n4.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       return data.results.map(result => ({
         locationName: result.locationName,
