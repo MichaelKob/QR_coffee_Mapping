@@ -30,31 +30,29 @@ app.get('/search', async (req, res) => {
   }
 
   try {
-    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location}`;
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
-
-    const response = await axios.get(searchUrl);
-    const html = response.data;
-    const $ = cheerio.load(html);
-
-    const results = [];
-    $('a').each((index, element) => {
-      const title = $(element).find('h3').text();
-      const description = $(element).find('.VwiC3b').text(); // Extracting description
-      if (title && !title.includes('Yelp')) {
-        // Extracting the actual location name
-        const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
-        results.push({ locationName });
-      }
-    });
-
-    // Deduplicate results based on locationName
-    const uniqueResults = results.filter((result, index, self) =>
-      index === self.findIndex((r) => r.locationName === result.locationName)
-    );
+    // Hardcoded list of park names
+    const parkNames = [
+      "Barretto Point Park",
+      "Bronx Park",
+      "Claremont Park",
+      "Concrete Plant Park",
+      "Crotona Park",
+      "Ferry Point Park",
+      "Franz Sigel Park",
+      "Joyce Kilmer Park",
+      "Macombs Dam Park",
+      "Mill Pond Park",
+      "Pelham Bay Park",
+      "Rev. T. Wendell Foster Park And Recreation Center",
+      "Soundview Park",
+      "St. James Park",
+      "St. Mary's Park",
+      "Van Cortlandt Park",
+      "Williamsbridge Oval"
+    ];
 
     // Limit results to top 10
-    const topResults = uniqueResults.slice(0, 10);
+    const topResults = parkNames.slice(0, 10).map(name => ({ locationName: name }));
 
     res.json({ results: topResults });
   } catch (error) {
