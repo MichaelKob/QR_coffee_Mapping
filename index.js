@@ -47,6 +47,40 @@ app.get('/search', async (req, res) => {
   }
 });
 
+app.post('/process', async (req, res) => {
+  const { websiteContent } = req.body;
+  if (!websiteContent) {
+    return res.status(400).json({ error: 'Website content is required' });
+  }
+
+  try {
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const openaiUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+
+    const response = await axios.post(
+      openaiUrl,
+      {
+        prompt: `Extract the names of public places to enjoy coffee from the following content:\n\n${websiteContent}\n\nNames:`,
+        max_tokens: 100,
+        n: 1,
+        stop: ['\n'],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
+        },
+      }
+    );
+
+    const suggestions = response.data.choices[0].text.trim().split('\n');
+    res.json({ suggestions });
+  } catch (error) {
+    console.error('Error processing website content:', error);
+    res.status(500).json({ error: 'Failed to process website content' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
