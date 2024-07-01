@@ -23,14 +23,34 @@ function App() {
     try {
       const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
       const data = await response.json();
-      return data.results.map(result => ({
-        locationName: result.locationName,
-        googleMapsLink: result.googleMapsLink,
-        description: result.description
+      const websiteContent = data.results.map(result => result.description).join('\n');
+      const suggestions = await processWebsiteContent(websiteContent);
+      return suggestions.map(suggestion => ({
+        locationName: suggestion,
+        googleMapsLink: '',
+        description: ''
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
       setError('Failed to fetch coffee spots. Please try again later.');
+      return [];
+    }
+  };
+
+  const processWebsiteContent = async (websiteContent) => {
+    try {
+      const response = await fetch('https://find-coffee-spots-wh4w4z73.devinapps.com/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ websiteContent })
+      });
+      const data = await response.json();
+      return data.suggestions;
+    } catch (error) {
+      console.error('Error processing website content:', error);
+      setError('Failed to process website content. Please try again later.');
       return [];
     }
   };
@@ -62,10 +82,9 @@ function App() {
                     <ul>
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
-                          <a href={spot.googleMapsLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', color: '#3182ce' }}>
+                          <span style={{ fontSize: '1.2rem', color: '#3182ce' }}>
                             {spot.locationName}
-                          </a>
-                          <p style={{ fontSize: '1rem', color: '#4a5568' }}>{spot.description}</p>
+                          </span>
                         </li>
                       ))}
                     </ul>
