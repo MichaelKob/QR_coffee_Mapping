@@ -29,7 +29,7 @@ app.get('/search', async (req, res) => {
       if (title && !title.includes('Yelp')) {
         // Extracting the actual location name
         const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
-        results.push({ locationName, description });
+        results.push({ locationName });
       }
     });
 
@@ -69,7 +69,7 @@ app.post('/process', async (req, res) => {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
         },
       }
     );
