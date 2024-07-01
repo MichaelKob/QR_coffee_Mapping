@@ -14,7 +14,7 @@ app.get('/search', async (req, res) => {
   }
 
   try {
-    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location}`;
+    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location} site:tripadvisor.com`;
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
 
     const response = await axios.get(searchUrl);
