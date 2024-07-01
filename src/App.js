@@ -14,12 +14,15 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`http://localhost:3001/search?location=${encodeURIComponent(location)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       return data.results.map(result => ({
-        locationName: result.locationName,
-        googleMapsLink: '',
-        description: ''
+        locationName: result.name,
+        googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(result.name)}`,
+        description: result.description
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
@@ -68,8 +71,11 @@ function App() {
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
                           <span style={{ fontSize: '1.2rem', color: '#000' }}>
-                            {spot.locationName}
+                            <a href={spot.googleMapsLink} target="_blank" rel="noopener noreferrer">
+                              {spot.locationName}
+                            </a>
                           </span>
+                          <p>{spot.description}</p>
                         </li>
                       ))}
                     </ul>
