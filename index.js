@@ -22,10 +22,17 @@ const logger = winston.createLogger({
 app.use(cors());
 app.use(express.json());
 
+const cache = {};
+
 app.get('/search', async (req, res) => {
   const location = req.query.location;
   if (!location) {
     return res.status(400).json({ error: 'Location is required' });
+  }
+
+  if (cache[location]) {
+    logger.info(`Serving from cache for location: ${location}`);
+    return res.json({ results: cache[location] });
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -54,6 +61,9 @@ app.get('/search', async (req, res) => {
 
     // Limit results to top 10
     const topResults = locationNames.slice(0, 10).map(name => ({ locationName: name }));
+
+    // Cache the results
+    cache[location] = topResults;
 
     res.json({ results: topResults });
   } catch (error) {
