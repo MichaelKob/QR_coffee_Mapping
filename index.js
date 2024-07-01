@@ -22,23 +22,48 @@ const logger = winston.createLogger({
 app.use(cors());
 app.use(express.json());
 
+const cache = {};
+
 app.get('/search', async (req, res) => {
   const location = req.query.location;
   if (!location) {
     return res.status(400).json({ error: 'Location is required' });
   }
 
+  if (cache[location]) {
+    logger.info(`Serving from cache for location: ${location}`);
+    return res.json({ results: cache[location] });
+  }
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
+
+  const makeRequest = async (url, retries = 5) => {
+    try {
+      const { data } = await axios.get(url);
+      return data;
+    } catch (error) {
+      if (error.response && error.response.status === 429 && retries > 0) {
+        const delay = Math.pow(2, 5 - retries) * 1000; // Increased exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return makeRequest(url, retries - 1);
+      } else {
+        throw error;
+      }
+    }
+  };
+
   try {
-    // Use Google Maps Places API to search for public places to enjoy coffee
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=best+places+to+enjoy+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
-    const { data } = await axios.get(searchUrl);
+    const data = await makeRequest(searchUrl);
 
     // Extract names of locations from search results
     const locationNames = data.results.map(result => result.name);
 
     // Limit results to top 10
     const topResults = locationNames.slice(0, 10).map(name => ({ locationName: name }));
+
+    // Cache the results
+    cache[location] = topResults;
 
     res.json({ results: topResults });
   } catch (error) {
