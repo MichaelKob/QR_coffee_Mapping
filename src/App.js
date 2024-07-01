@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ChakraProvider, Box, Text, Spinner } from '@chakra-ui/react';
 import { LoadScript } from '@react-google-maps/api';
 import LocationInput from './LocationInput';
 import './App.css';
+import debounce from 'lodash.debounce';
 
 const libraries = ['places'];
 
@@ -10,14 +11,6 @@ function App() {
   const [coffeeSpots, setCoffeeSpots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const handleLocationSubmit = async (location) => {
-    setLoading(true);
-    setError(null);
-    const spots = await fetchCoffeeSpots(location);
-    setCoffeeSpots(spots);
-    setLoading(false);
-  };
 
   const fetchCoffeeSpots = async (location) => {
     try {
@@ -38,6 +31,14 @@ function App() {
       return [];
     }
   };
+
+  const handleLocationSubmit = useCallback(debounce(async (location) => {
+    setLoading(true);
+    setError(null);
+    const spots = await fetchCoffeeSpots(location);
+    setCoffeeSpots(spots);
+    setLoading(false);
+  }, 1000), []); // 1000ms debounce delay
 
   return (
     <ChakraProvider>
