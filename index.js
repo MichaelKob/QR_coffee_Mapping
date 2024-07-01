@@ -28,7 +28,7 @@ app.get('/search', async (req, res) => {
       const description = $(element).find('.VwiC3b').text(); // Extracting description
       if (title && link && !title.includes('Yelp') && !link.includes('yelp.com')) {
         // Extracting the actual location name and Google Maps link
-        const locationName = title;
+        const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
         const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
         // Ensure the link is a direct Google Maps link
         if (googleMapsLink.includes('google.com/maps')) {
