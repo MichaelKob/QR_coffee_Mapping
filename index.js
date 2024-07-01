@@ -31,14 +31,19 @@ app.get('/search', async (req, res) => {
         const locationName = title;
         const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
         // Ensure the link is a direct Google Maps link
-        if (googleMapsLink.includes('google.com/maps') && !link.includes('search')) {
+        if (googleMapsLink.includes('google.com/maps')) {
           results.push({ locationName, googleMapsLink, description });
         }
       }
     });
 
+    // Deduplicate results based on locationName and googleMapsLink
+    const uniqueResults = results.filter((result, index, self) =>
+      index === self.findIndex((r) => r.locationName === result.locationName && r.googleMapsLink === result.googleMapsLink)
+    );
+
     // Limit results to top 10
-    const topResults = results.slice(0, 10);
+    const topResults = uniqueResults.slice(0, 10);
 
     res.json({ results: topResults });
   } catch (error) {
