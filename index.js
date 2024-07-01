@@ -6,6 +6,7 @@ const app = express();
 const port = 3001;
 
 app.use(cors());
+app.use(express.json());
 
 app.get('/search', async (req, res) => {
   const location = req.query.location;
@@ -54,26 +55,27 @@ app.post('/process', async (req, res) => {
   }
 
   try {
-    const openaiApiKey = process.env.OPENAI_API_KEY;
-    const openaiUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    const geminiUrl = 'https://language.googleapis.com/v1/documents:analyzeEntities?key=' + geminiApiKey;
 
     const response = await axios.post(
-      openaiUrl,
+      geminiUrl,
       {
-        prompt: `Extract the names of public places to enjoy coffee from the following content:\n\n${websiteContent}\n\nNames:`,
-        max_tokens: 100,
-        n: 1,
-        stop: ['\n'],
+        document: {
+          type: 'PLAIN_TEXT',
+          content: websiteContent,
+        },
+        encodingType: 'UTF8',
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`,
         },
       }
     );
 
-    const suggestions = response.data.choices[0].text.trim().split('\n');
+    const entities = response.data.entities;
+    const suggestions = entities.map(entity => entity.name).slice(0, 10);
     res.json({ suggestions });
   } catch (error) {
     console.error('Error processing website content:', error);
