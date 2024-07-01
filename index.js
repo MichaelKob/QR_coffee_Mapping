@@ -72,7 +72,7 @@ app.post('/process', async (req, res) => {
   const chatgptApiKey = process.env.CHATGPT_API_KEY;
   const chatgptUrl = 'https://api.openai.com/v1/chat/completions';
 
-  // Retry mechanism with exponential backoff
+  // Retry mechanism with exponential backoff and jitter
   const makeRequest = async (retryCount = 0) => {
     try {
       const response = await axios.post(
@@ -100,8 +100,8 @@ app.post('/process', async (req, res) => {
       return res.json({ results });
     } catch (error) {
       if (error.response && error.response.status === 429 && retryCount < 5) {
-        // Exponential backoff
-        const delay = Math.pow(2, retryCount) * 1000;
+        // Exponential backoff with jitter
+        const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
         logger.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
         setTimeout(() => makeRequest(retryCount + 1), delay);
       } else {
