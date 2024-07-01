@@ -32,6 +32,10 @@ function App() {
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       setError('Failed to fetch coffee spots. Please try again later.');
       return [];
     }
@@ -50,6 +54,10 @@ function App() {
       return data.suggestions;
     } catch (error) {
       console.error('Error processing website content:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       setError('Failed to process website content. Please try again later.');
       return [];
     }
