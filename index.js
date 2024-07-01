@@ -3,8 +3,22 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
+const winston = require('winston');
 const app = express();
 const port = 3001;
+
+// Configure winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
 
 app.use(cors());
 app.use(express.json());
@@ -44,7 +58,7 @@ app.get('/search', async (req, res) => {
 
     res.json({ results: topResults });
   } catch (error) {
-    console.error('Error fetching search results:', error);
+    logger.error('Error fetching search results:', error);
     res.status(500).json({ error: 'Failed to fetch search results' });
   }
 });
@@ -86,10 +100,10 @@ app.post('/process', async (req, res) => {
       if (error.response && error.response.status === 429 && retryCount < 5) {
         // Exponential backoff
         const delay = Math.pow(2, retryCount) * 1000;
-        console.log(`Rate limit exceeded. Retrying in ${delay}ms...`);
+        logger.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
         setTimeout(() => makeRequest(retryCount + 1), delay);
       } else {
-        console.error('Error processing website content:', error);
+        logger.error('Error processing website content:', error);
         res.status(500).json({ error: 'Failed to process website content' });
       }
     }
@@ -99,5 +113,5 @@ app.post('/process', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  logger.info(`Server running on port ${port}`);
 });
