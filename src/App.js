@@ -24,8 +24,8 @@ function App() {
       const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
       const data = await response.json();
       return data.results.map(result => ({
-        title: result.title,
-        link: result.link,
+        locationName: result.locationName,
+        googleMapsLink: result.googleMapsLink,
         description: result.description
       }));
     } catch (error) {
@@ -62,8 +62,8 @@ function App() {
                     <ul>
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
-                          <a href={spot.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', color: '#3182ce' }}>
-                            {spot.title}
+                          <a href={spot.googleMapsLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', color: '#3182ce' }}>
+                            {spot.locationName}
                           </a>
                           <p style={{ fontSize: '1rem', color: '#4a5568' }}>{spot.description}</p>
                         </li>
