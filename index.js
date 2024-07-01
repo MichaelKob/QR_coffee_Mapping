@@ -72,6 +72,7 @@ app.post('/process', async (req, res) => {
   const chatgptApiKey = process.env.CHATGPT_API_KEY;
   const chatgptUrl = 'https://api.openai.com/v1/chat/completions';
 
+  // Retry mechanism with exponential backoff
   const makeRequest = async (retryCount = 0) => {
     try {
       const response = await axios.post(
@@ -95,7 +96,8 @@ app.post('/process', async (req, res) => {
       const googleMapsLinks = suggestions.map(suggestion => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion)}`);
       const results = suggestions.map((suggestion, index) => ({ name: suggestion, link: googleMapsLinks[index] }));
 
-      res.json({ results });
+      // Send the response back to the client
+      return res.json({ results });
     } catch (error) {
       if (error.response && error.response.status === 429 && retryCount < 5) {
         // Exponential backoff
@@ -104,7 +106,7 @@ app.post('/process', async (req, res) => {
         setTimeout(() => makeRequest(retryCount + 1), delay);
       } else {
         logger.error('Error processing website content:', error);
-        res.status(500).json({ error: 'Failed to process website content' });
+        return res.status(500).json({ error: 'Failed to process website content' });
       }
     }
   };
