@@ -6,6 +6,7 @@ const app = express();
 const port = 3001;
 
 app.use(cors());
+app.use(express.json());
 
 app.get('/search', async (req, res) => {
   const location = req.query.location;
@@ -28,7 +29,7 @@ app.get('/search', async (req, res) => {
       if (title && !title.includes('Yelp')) {
         // Extracting the actual location name
         const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
-        results.push({ locationName, description });
+        results.push({ locationName });
       }
     });
 
@@ -44,6 +45,41 @@ app.get('/search', async (req, res) => {
   } catch (error) {
     console.error('Error fetching search results:', error);
     res.status(500).json({ error: 'Failed to fetch search results' });
+  }
+});
+
+app.post('/process', async (req, res) => {
+  const { websiteContent } = req.body;
+  if (!websiteContent) {
+    return res.status(400).json({ error: 'Website content is required' });
+  }
+
+  try {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    const geminiUrl = 'https://language.googleapis.com/v1/documents:analyzeEntities?key=' + geminiApiKey;
+
+    const response = await axios.post(
+      geminiUrl,
+      {
+        document: {
+          type: 'PLAIN_TEXT',
+          content: websiteContent,
+        },
+        encodingType: 'UTF8',
+      },
+      {
+        headers: {
+        'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const entities = response.data.entities;
+    const suggestions = entities.map(entity => entity.name).slice(0, 10);
+    res.json({ suggestions });
+  } catch (error) {
+    console.error('Error processing website content:', error);
+    res.status(500).json({ error: 'Failed to process website content' });
   }
 });
 
