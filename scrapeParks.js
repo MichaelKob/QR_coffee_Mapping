@@ -1,8 +1,9 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-async function scrapeParks() {
+async function scrapeParks(location) {
   try {
+    // URL of the San Francisco Travel article
     const url = 'https://www.sftravel.com/article/san-francisco-parks-where-to-enjoy-great-outdoors';
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
@@ -11,7 +12,7 @@ async function scrapeParks() {
 
     $('h2').each((index, element) => {
       const parkName = $(element).text().trim();
-      const parkDescription = $(element).next('p').text().trim();
+      const parkDescription = $(element).nextUntil('h2').text().trim();
       if (parkName && parkDescription) {
         parks.push({ name: parkName, description: parkDescription });
       }
