@@ -3,18 +3,18 @@ const cheerio = require('cheerio');
 
 async function scrapeParks(location) {
   try {
-    // URL of the San Francisco Travel article
-    const url = 'https://www.sftravel.com/article/san-francisco-parks-where-to-enjoy-great-outdoors';
+    // Construct the URL based on the user's inputted location
+    const url = `https://en.wikipedia.org/wiki/Category:Parks_in_${encodeURIComponent(location)}`;
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
     const parks = [];
 
-    $('h2').each((index, element) => {
+    $('div.mw-category-group ul li a').each((index, element) => {
       const parkName = $(element).text().trim();
-      const parkDescription = $(element).next('p').text().trim();
-      if (parkName && parkDescription) {
-        parks.push({ name: parkName, description: parkDescription });
+      const parkLink = `https://en.wikipedia.org${$(element).attr('href')}`;
+      if (parkName && parkLink) {
+        parks.push({ name: parkName, link: parkLink });
       }
     });
 
