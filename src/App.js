@@ -14,9 +14,10 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`http://localhost:3001/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`https://find-coffee-places-09fui5rv.devinapps.com/search?location=${encodeURIComponent(location)}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       return data.results.map(result => ({
@@ -26,11 +27,7 @@ function App() {
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
-      setError('Failed to fetch coffee spots. Please try again later.');
+      setError(error.message || 'Failed to fetch coffee spots. Please try again later.');
       return [];
     }
   };
