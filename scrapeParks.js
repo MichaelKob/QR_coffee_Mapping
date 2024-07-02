@@ -1,13 +1,19 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const cache = new Map();
 
 async function scrapeParks(location) {
   try {
+    if (cache.has(location)) {
+      return cache.get(location);
+    }
+
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
     const { data: geocodeData } = await axios.get(geocodeUrl);
     if (!geocodeData.results || geocodeData.results.length === 0 || !geocodeData.results[0].geometry) {
       console.error(`Geocoding API returned no results or no geometry data for location: ${location}`, geocodeData);
+      console.log('Full Geocoding API response:', JSON.stringify(geocodeData, null, 2));
       return { error: `Geocoding API returned no results or no geometry data for location: ${location}` };
     }
     const cityBounds = geocodeData.results[0].geometry.bounds;
@@ -36,7 +42,7 @@ async function scrapeParks(location) {
     $('div.mw-search-result-heading a').each((index, element) => {
       const pageTitle = $(element).text().trim();
       const pageLink = `https://en.wikipedia.org${$(element).attr('href')}`;
-      if (pageTitle.toLowerCase().includes('list of') || pageTitle.toLowerCase().includes('parks in') || pageTitle.toLowerCase().includes('beaches in') || pageTitle.toLowerCase().includes('lakes in')) {
+      if (pageTitle.toLowerCase().includes('list of') || pageTitle.toLowerCase().includes('parks in') || pageTitle.toLowerCase().includes('beaches in') || pageTitle.toLowerCase().includes('lakes in') || pageTitle.toLowerCase().includes('public places in')) {
         searchResults.push(pageLink);
       }
     });
@@ -46,7 +52,7 @@ async function scrapeParks(location) {
       const { data: pageData } = await axios.get(pageLink);
       const $$ = cheerio.load(pageData);
 
-      $$('div.mw-category-group ul li a').each((index, element) => {
+      $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each((index, element) => {
         const placeName = $$(element).text().trim();
         if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
@@ -56,6 +62,7 @@ async function scrapeParks(location) {
 
       if (places.length > 0) {
         const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+        cache.set(location, filteredPlaces);
         return filteredPlaces;
       }
     }
@@ -76,6 +83,7 @@ async function scrapeParks(location) {
 
       if (places.length > 0) {
         const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+        cache.set(location, filteredPlaces);
         return filteredPlaces;
       }
 
@@ -95,6 +103,7 @@ async function scrapeParks(location) {
 
         if (places.length > 0) {
           const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+          cache.set(location, filteredPlaces);
           return filteredPlaces;
         }
       }
@@ -115,15 +124,24 @@ async function scrapeParks(location) {
     }
 
     const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+    cache.set(location, filteredPlaces);
 
     return filteredPlaces;
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      console.error(`No parks category page found for location: ${location}`);
-      return { error: `No parks category page found for location: ${location}` };
+    if (error.response) {
+      if (error.response.status === 404) {
+        console.error(`No parks category page found for location: ${location}`);
+        return { error: `No parks category page found for location: ${location}` };
+      } else if (error.response.status === 429) {
+        console.error('Rate limit exceeded. Please try again later.');
+        return { error: 'Rate limit exceeded. Please try again later.' };
+      } else {
+        console.error('Error scraping parks:', error.response.data);
+        return { error: `Failed to fetch parks data: ${error.response.data}` };
+      }
     } else {
-      console.error('Error scraping parks:', error);
-      return { error: 'Failed to fetch parks data' };
+      console.error('Error scraping parks:', error.message);
+      return { error: `Failed to fetch parks data: ${error.message}` };
     }
   }
 }
