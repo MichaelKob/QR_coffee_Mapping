@@ -38,6 +38,9 @@ app.get('/search', async (req, res) => {
 
   try {
     const parks = await scrapeParks(location);
+    if (parks.error) {
+      return res.status(404).json({ error: parks.error });
+    }
     const topResults = parks.slice(0, 10);
 
     // Cache the results

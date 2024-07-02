@@ -18,10 +18,45 @@ async function scrapeParks(location) {
       }
     });
 
+    // If no parks are found, try an alternative URL or search query
+    if (parks.length === 0) {
+      const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks')}`;
+      const { data: searchData } = await axios.get(searchUrl);
+      const $$ = cheerio.load(searchData);
+
+      $$('div.mw-search-result-heading a').each((index, element) => {
+        const parkName = $$(element).text().trim();
+        if (parkName) {
+          const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
+          parks.push({ name: parkName, link: googleMapsLink });
+        }
+      });
+
+      // Additional fallback: Check for search results with "List of parks in [location]"
+      if (parks.length === 0) {
+        const listSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent('List of parks in ' + location)}`;
+        const { data: listSearchData } = await axios.get(listSearchUrl);
+        const $$$ = cheerio.load(listSearchData);
+
+        $$$('div.mw-search-result-heading a').each((index, element) => {
+          const parkName = $$$(element).text().trim();
+          if (parkName) {
+            const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
+            parks.push({ name: parkName, link: googleMapsLink });
+          }
+        });
+      }
+    }
+
     return parks;
   } catch (error) {
-    console.error('Error scraping parks:', error);
-    return [];
+    if (error.response && error.response.status === 404) {
+      console.error(`No parks category page found for location: ${location}`);
+      return { error: `No parks category page found for location: ${location}` };
+    } else {
+      console.error('Error scraping parks:', error);
+      return { error: 'Failed to fetch parks data' };
+    }
   }
 }
 
