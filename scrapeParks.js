@@ -6,6 +6,10 @@ async function scrapeParks(location) {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
     const { data: geocodeData } = await axios.get(geocodeUrl);
+    if (!geocodeData.results || geocodeData.results.length === 0) {
+      console.error(`Geocoding API returned no results for location: ${location}`, geocodeData);
+      return { error: `Geocoding API returned no results for location: ${location}` };
+    }
     const cityBounds = geocodeData.results[0].geometry.bounds;
 
     const filterPlacesWithinCityBounds = (places, cityBounds) => {
