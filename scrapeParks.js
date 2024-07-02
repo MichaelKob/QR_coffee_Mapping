@@ -12,9 +12,9 @@ async function scrapeParks(location) {
 
     $('div.mw-category-group ul li a').each((index, element) => {
       const parkName = $(element).text().trim();
-      const parkLink = `https://en.wikipedia.org${$(element).attr('href')}`;
-      if (parkName && parkLink) {
-        parks.push({ name: parkName, link: parkLink });
+      if (parkName) {
+        const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
+        parks.push({ name: parkName, link: googleMapsLink });
       }
     });
 
