@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const winston = require('winston');
+const scrapeParks = require('./scrapeParks');
 const app = express();
 const port = 3001;
 
@@ -35,32 +36,9 @@ app.get('/search', async (req, res) => {
     return res.json({ results: cache[location] });
   }
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=public+places+to+hang+out+and+drink+coffee+in+${encodeURIComponent(location)}&key=${apiKey}`;
-
-  const makeRequest = async (url, retries = 5) => {
-    try {
-      const { data } = await axios.get(url);
-      return data;
-    } catch (error) {
-      if (error.response && error.response.status === 429 && retries > 0) {
-        const delay = Math.pow(2, 5 - retries) * 1000; // Increased exponential backoff
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return makeRequest(url, retries - 1);
-      } else {
-        throw error;
-      }
-    }
-  };
-
   try {
-    const data = await makeRequest(searchUrl);
-
-    // Extract names of locations from search results
-    const locationNames = data.results.map(result => result.name);
-
-    // Limit results to top 10
-    const topResults = locationNames.slice(0, 10).map(name => ({ locationName: name }));
+    const parks = await scrapeParks(location);
+    const topResults = parks.slice(0, 10);
 
     // Cache the results
     cache[location] = topResults;
