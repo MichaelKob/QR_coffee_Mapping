@@ -12,7 +12,7 @@ async function scrapeParks(location) {
 
     $('h2').each((index, element) => {
       const parkName = $(element).text().trim();
-      const parkDescription = $(element).nextUntil('h2').text().trim();
+      const parkDescription = $(element).next('p').text().trim();
       if (parkName && parkDescription) {
         parks.push({ name: parkName, description: parkDescription });
       }
