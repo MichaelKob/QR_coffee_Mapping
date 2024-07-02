@@ -3,6 +3,23 @@ const cheerio = require('cheerio');
 
 async function scrapeParks(location) {
   try {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
+    const { data: geocodeData } = await axios.get(geocodeUrl);
+    const cityBounds = geocodeData.results[0].geometry.bounds;
+
+    const filterPlacesWithinCityBounds = (places, cityBounds) => {
+      return places.filter(place => {
+        const { lat, lng } = place.location;
+        return (
+          lat >= cityBounds.southwest.lat &&
+          lat <= cityBounds.northeast.lat &&
+          lng >= cityBounds.southwest.lng &&
+          lng <= cityBounds.northeast.lng
+        );
+      });
+    };
+
     // Construct a more general search URL based on the user's inputted location
     const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks beaches lakes')}`;
     const { data: searchData } = await axios.get(searchUrl);
@@ -92,22 +109,6 @@ async function scrapeParks(location) {
         places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
       });
     }
-
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
-    const { data: geocodeData } = await axios.get(geocodeUrl);
-    const cityBounds = geocodeData.results[0].geometry.bounds;
-
-    const filterPlacesWithinCityBounds = (places, cityBounds) => {
-      return places.filter(place => {
-        const { lat, lng } = place.location;
-        return (
-          lat >= cityBounds.southwest.lat &&
-          lat <= cityBounds.northeast.lat &&
-          lng >= cityBounds.southwest.lng &&
-          lng <= cityBounds.northeast.lng
-        );
-      });
-    };
 
     const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
 
