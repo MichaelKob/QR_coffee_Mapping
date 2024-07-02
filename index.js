@@ -37,7 +37,7 @@ app.get('/search', async (req, res) => {
   }
 
   try {
-    const parks = await scrapeParks();
+    const parks = await scrapeParks(location);
     const topResults = parks.slice(0, 10);
 
     // Cache the results
