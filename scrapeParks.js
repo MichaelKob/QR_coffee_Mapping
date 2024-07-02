@@ -74,9 +74,27 @@ async function scrapeParks(location) {
 
       googleData.results.forEach(result => {
         const placeName = result.name;
+        const placeLocation = result.geometry.location;
         const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
-        places.push({ name: placeName, link: googleMapsLink });
+        places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
       });
+
+      // Filter results to ensure they are within the city limits
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
+      const { data: geocodeData } = await axios.get(geocodeUrl);
+      const cityBounds = geocodeData.results[0].geometry.bounds;
+
+      const filteredPlaces = places.filter(place => {
+        const { lat, lng } = place.location;
+        return (
+          lat >= cityBounds.southwest.lat &&
+          lat <= cityBounds.northeast.lat &&
+          lng >= cityBounds.southwest.lng &&
+          lng <= cityBounds.northeast.lng
+        );
+      });
+
+      return filteredPlaces;
     }
 
     return places;
