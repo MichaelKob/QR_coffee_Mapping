@@ -45,6 +45,21 @@ async function scrapeParks(location) {
             parks.push({ name: parkName, link: googleMapsLink });
           }
         });
+
+        // Final fallback: Directly search for parks in the location
+        if (parks.length === 0) {
+          const directSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks')}`;
+          const { data: directSearchData } = await axios.get(directSearchUrl);
+          const $$$$ = cheerio.load(directSearchData);
+
+          $$$$('div.mw-search-result-heading a').each((index, element) => {
+            const parkName = $$$$(element).text().trim();
+            if (parkName) {
+              const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
+              parks.push({ name: parkName, link: googleMapsLink });
+            }
+          });
+        }
       }
     }
 
