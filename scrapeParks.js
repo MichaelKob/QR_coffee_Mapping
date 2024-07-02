@@ -24,21 +24,22 @@ async function scrapeParks(location) {
       const { data: searchData } = await axios.get(searchUrl);
       const $$ = cheerio.load(searchData);
 
+      // Parse search results to find relevant pages with lists of parks
+      const searchResults = [];
       $$('div.mw-search-result-heading a').each((index, element) => {
-        const parkName = $$(element).text().trim();
-        if (parkName) {
-          const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
-          parks.push({ name: parkName, link: googleMapsLink });
+        const pageTitle = $$(element).text().trim();
+        const pageLink = `https://en.wikipedia.org${$$(element).attr('href')}`;
+        if (pageTitle.toLowerCase().includes('list of parks') || pageTitle.toLowerCase().includes('parks in')) {
+          searchResults.push(pageLink);
         }
       });
 
-      // Additional fallback: Check for search results with "List of parks in [location]"
-      if (parks.length === 0) {
-        const listSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent('List of parks in ' + location)}`;
-        const { data: listSearchData } = await axios.get(listSearchUrl);
-        const $$$ = cheerio.load(listSearchData);
+      // Follow links to extract park names
+      for (const pageLink of searchResults) {
+        const { data: pageData } = await axios.get(pageLink);
+        const $$$ = cheerio.load(pageData);
 
-        $$$('div.mw-search-result-heading a').each((index, element) => {
+        $$$('div.mw-category-group ul li a').each((index, element) => {
           const parkName = $$$(element).text().trim();
           if (parkName) {
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
@@ -46,34 +47,36 @@ async function scrapeParks(location) {
           }
         });
 
-        // Final fallback: Directly search for parks in the location
-        if (parks.length === 0) {
-          const directSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks')}`;
-          const { data: directSearchData } = await axios.get(directSearchUrl);
-          const $$$$ = cheerio.load(directSearchData);
+        if (parks.length > 0) break; // Stop if parks are found
+      }
 
-          $$$$('div.mw-search-result-heading a').each((index, element) => {
-            const parkName = $$$$(element).text().trim();
+      // Additional fallback: Directly search for parks in the location
+      if (parks.length === 0) {
+        const directSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks')}`;
+        const { data: directSearchData } = await axios.get(directSearchUrl);
+        const $$$$ = cheerio.load(directSearchData);
+
+        $$$$('div.mw-search-result-heading a').each((index, element) => {
+          const parkName = $$$$(element).text().trim();
+          if (parkName) {
+            const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
+            parks.push({ name: parkName, link: googleMapsLink });
+          }
+        });
+
+        // Additional fallback: Directly search for "public parks in [location]"
+        if (parks.length === 0) {
+          const finalSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent('public parks in ' + location)}`;
+          const { data: finalSearchData } = await axios.get(finalSearchUrl);
+          const $$$$$ = cheerio.load(finalSearchData);
+
+          $$$$$('div.mw-search-result-heading a').each((index, element) => {
+            const parkName = $$$$$(element).text().trim();
             if (parkName) {
               const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
               parks.push({ name: parkName, link: googleMapsLink });
             }
           });
-
-          // Additional fallback: Directly search for "public parks in [location]"
-          if (parks.length === 0) {
-            const finalSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent('public parks in ' + location)}`;
-            const { data: finalSearchData } = await axios.get(finalSearchUrl);
-            const $$$$$ = cheerio.load(finalSearchData);
-
-            $$$$$('div.mw-search-result-heading a').each((index, element) => {
-              const parkName = $$$$$(element).text().trim();
-              if (parkName) {
-                const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parkName + ' ' + location)}`;
-                parks.push({ name: parkName, link: googleMapsLink });
-              }
-            });
-          }
         }
       }
     }
