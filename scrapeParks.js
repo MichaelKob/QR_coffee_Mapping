@@ -27,13 +27,16 @@ async function scrapeParks(location) {
 
       $$('div.mw-category-group ul li a').each((index, element) => {
         const placeName = $$(element).text().trim();
-        if (placeName) {
+        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           places.push({ name: placeName, link: googleMapsLink });
         }
       });
 
-      if (places.length > 0) break; // Stop if places are found
+      if (places.length > 0) {
+        const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+        return filteredPlaces;
+      }
     }
 
     // Additional fallback: Directly search for places in the location
@@ -44,11 +47,16 @@ async function scrapeParks(location) {
 
       $$$('div.mw-search-result-heading a').each((index, element) => {
         const placeName = $(element).text().trim();
-        if (placeName) {
+        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           places.push({ name: placeName, link: googleMapsLink });
         }
       });
+
+      if (places.length > 0) {
+        const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+        return filteredPlaces;
+      }
 
       // Additional fallback: Directly search for "public parks beaches lakes in [location]"
       if (places.length === 0) {
@@ -58,11 +66,16 @@ async function scrapeParks(location) {
 
         $$$$('div.mw-search-result-heading a').each((index, element) => {
           const placeName = $(element).text().trim();
-          if (placeName) {
+          if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
             places.push({ name: placeName, link: googleMapsLink });
           }
         });
+
+        if (places.length > 0) {
+          const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
+          return filteredPlaces;
+        }
       }
     }
 
@@ -78,13 +91,14 @@ async function scrapeParks(location) {
         const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
         places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
       });
+    }
 
-      // Filter results to ensure they are within the city limits
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
-      const { data: geocodeData } = await axios.get(geocodeUrl);
-      const cityBounds = geocodeData.results[0].geometry.bounds;
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
+    const { data: geocodeData } = await axios.get(geocodeUrl);
+    const cityBounds = geocodeData.results[0].geometry.bounds;
 
-      const filteredPlaces = places.filter(place => {
+    const filterPlacesWithinCityBounds = (places, cityBounds) => {
+      return places.filter(place => {
         const { lat, lng } = place.location;
         return (
           lat >= cityBounds.southwest.lat &&
@@ -93,11 +107,11 @@ async function scrapeParks(location) {
           lng <= cityBounds.northeast.lng
         );
       });
+    };
 
-      return filteredPlaces;
-    }
+    const filteredPlaces = filterPlacesWithinCityBounds(places, cityBounds);
 
-    return places;
+    return filteredPlaces;
   } catch (error) {
     if (error.response && error.response.status === 404) {
       console.error(`No parks category page found for location: ${location}`);
@@ -108,5 +122,4 @@ async function scrapeParks(location) {
     }
   }
 }
-
 module.exports = scrapeParks;
