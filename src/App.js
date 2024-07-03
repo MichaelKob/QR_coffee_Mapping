@@ -21,14 +21,15 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`https://find-coffee-spots-wh4w4z73.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      const response = await fetch(`https://find-coffee-places-09fui5rv.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      const websiteContent = data.results.map(result => result.description).join('\n');
-      const suggestions = await processWebsiteContent(websiteContent);
-      return suggestions.map(suggestion => ({
-        locationName: suggestion,
-        googleMapsLink: '',
-        description: ''
+      return data.results.map(result => ({
+        locationName: result.name,
+        googleMapsLink: result.googleMapsLink,
+        description: result.description
       }));
     } catch (error) {
       console.error('Error fetching coffee spots:', error);
@@ -36,29 +37,7 @@ function App() {
         console.error('Response status:', error.response.status);
         console.error('Response data:', error.response.data);
       }
-      setError('Failed to fetch coffee spots. Please try again later.');
-      return [];
-    }
-  };
-
-  const processWebsiteContent = async (websiteContent) => {
-    try {
-      const response = await fetch('https://find-coffee-spots-wh4w4z73.devinapps.com/process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ websiteContent })
-      });
-      const data = await response.json();
-      return data.suggestions;
-    } catch (error) {
-      console.error('Error processing website content:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
-      setError('Failed to process website content. Please try again later.');
+      setError(`Failed to fetch coffee spots: ${error.message}`);
       return [];
     }
   };
@@ -91,8 +70,11 @@ function App() {
                       {coffeeSpots.map((spot, index) => (
                         <li key={index} style={{ marginBottom: '1rem' }}>
                           <span style={{ fontSize: '1.2rem', color: '#000' }}>
-                            {spot.locationName}
+                            <a href={spot.googleMapsLink} target="_blank" rel="noopener noreferrer">
+                              {spot.locationName}
+                            </a>
                           </span>
+                          <p>{spot.description}</p>
                         </li>
                       ))}
                     </ul>
