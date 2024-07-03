@@ -14,7 +14,9 @@ function App() {
 
   const fetchCoffeeSpots = async (location) => {
     try {
-      const response = await fetch(`https://find-coffee-places-09fui5rv.devinapps.com/search?location=${encodeURIComponent(location)}`);
+      const url = `https://find-coffee-places-09fui5rv.devinapps.com/search?location=${encodeURIComponent(location)}`;
+      console.log('Fetching coffee spots with URL:', url);
+      const response = await fetch(url);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -33,6 +35,7 @@ function App() {
   };
 
   const handleLocationSubmit = useCallback(debounce(async (location) => {
+    console.log('Location submitted:', location);
     setLoading(true);
     setError(null);
     const spots = await fetchCoffeeSpots(location);
