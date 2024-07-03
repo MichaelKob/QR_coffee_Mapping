@@ -29,6 +29,10 @@ async function scrapeParks(location) {
     const cityBounds = geocodeData.results[0].geometry.bounds;
 
     const filterPlacesWithinCityBounds = (places, cityBounds) => {
+      if (!cityBounds) {
+        console.warn('City bounds are not defined.');
+        return places; // If city bounds are not defined, return all places
+      }
       return places.filter(place => {
         if (!place.location) {
           console.warn(`Place ${place.name} does not have location data.`);
