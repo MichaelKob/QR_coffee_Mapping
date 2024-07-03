@@ -4,7 +4,7 @@ const Bottleneck = require('bottleneck');
 const cache = new Map();
 
 const limiter = new Bottleneck({
-  minTime: 4000, // Minimum time between requests in milliseconds
+  minTime: 2000, // Minimum time between requests in milliseconds
   maxConcurrent: 1, // Maximum number of concurrent requests
 });
 
