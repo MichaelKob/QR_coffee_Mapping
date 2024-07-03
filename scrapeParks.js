@@ -183,6 +183,7 @@ async function scrapeParks(location) {
 
     return filteredPlaces;
   } catch (error) {
+    console.error('Error scraping parks:', error);
     if (error.response) {
       if (error.response.status === 404) {
         console.error(`No parks category page found for location: ${location}`);
