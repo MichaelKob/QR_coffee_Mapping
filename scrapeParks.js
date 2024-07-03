@@ -28,7 +28,8 @@ async function scrapeParks(location) {
     const filterPlacesWithinCityBounds = (places, cityBounds) => {
       return places.filter(place => {
         if (!place.location) {
-          return false;
+          console.warn(`Place ${place.name} does not have location data.`);
+          return true; // Include places without location data for now
         }
         const { lat, lng } = place.location;
         return (
