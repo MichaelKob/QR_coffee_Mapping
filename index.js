@@ -22,7 +22,7 @@ const logger = winston.createLogger({
 
 // Configure CORS to allow requests from the Netlify frontend
 const corsOptions = {
-  origin: ['https://beamish-meringue-54ac84.netlify.app', 'https://ephemeral-granita-771a69.netlify.app'],
+  origin: ['https://beamish-meringue-54ac84.netlify.app', 'https://ephemeral-granita-771a69.netlify.app', 'https://coruscating-swan-0ff912.netlify.app'],
   optionsSuccessStatus: 200
 };
 
