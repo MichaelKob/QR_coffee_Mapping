@@ -1,12 +1,29 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const cheerio = require('cheerio');
 const cors = require('cors');
+const winston = require('winston');
+const scrapeParks = require('./scrapeParks');
 const app = express();
 const port = 3001;
 
+// Configure winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
+
 app.use(cors());
 app.use(express.json());
+
+const cache = {};
 
 app.get('/search', async (req, res) => {
   const location = req.query.location;
@@ -14,75 +31,28 @@ app.get('/search', async (req, res) => {
     return res.status(400).json({ error: 'Location is required' });
   }
 
+  if (cache[location]) {
+    logger.info(`Serving from cache for location: ${location}`);
+    return res.json({ results: cache[location] });
+  }
+
   try {
-    const searchQuery = `best parks, beaches, and lakes to enjoy coffee in ${location} site:tripadvisor.com`;
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+    const parks = await scrapeParks(location);
+    if (parks.error) {
+      return res.status(404).json({ error: parks.error });
+    }
+    const topResults = parks.slice(0, 10);
 
-    const response = await axios.get(searchUrl);
-    const html = response.data;
-    const $ = cheerio.load(html);
-
-    const results = [];
-    $('a').each((index, element) => {
-      const title = $(element).find('h3').text();
-      const description = $(element).find('.VwiC3b').text(); // Extracting description
-      if (title && !title.includes('Yelp')) {
-        // Extracting the actual location name
-        const locationName = $(element).find('.BNeawe.vvjwJb.AP7Wnd').text() || $(element).find('.BNeawe.deIvCb.AP7Wnd').text() || $(element).find('.BNeawe.tAd8D.AP7Wnd').text() || $(element).find('.BNeawe.iBp4i.AP7Wnd').text() || title; // Use more specific selectors for location name
-        results.push({ locationName });
-      }
-    });
-
-    // Deduplicate results based on locationName
-    const uniqueResults = results.filter((result, index, self) =>
-      index === self.findIndex((r) => r.locationName === result.locationName)
-    );
-
-    // Limit results to top 10
-    const topResults = uniqueResults.slice(0, 10);
+    // Cache the results
+    cache[location] = topResults;
 
     res.json({ results: topResults });
   } catch (error) {
-    console.error('Error fetching search results:', error);
+    logger.error('Error fetching search results:', error);
     res.status(500).json({ error: 'Failed to fetch search results' });
   }
 });
 
-app.post('/process', async (req, res) => {
-  const { websiteContent } = req.body;
-  if (!websiteContent) {
-    return res.status(400).json({ error: 'Website content is required' });
-  }
-
-  try {
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    const geminiUrl = 'https://language.googleapis.com/v1/documents:analyzeEntities?key=' + geminiApiKey;
-
-    const response = await axios.post(
-      geminiUrl,
-      {
-        document: {
-          type: 'PLAIN_TEXT',
-          content: websiteContent,
-        },
-        encodingType: 'UTF8',
-      },
-      {
-        headers: {
-        'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    const entities = response.data.entities;
-    const suggestions = entities.map(entity => entity.name).slice(0, 10);
-    res.json({ suggestions });
-  } catch (error) {
-    console.error('Error processing website content:', error);
-    res.status(500).json({ error: 'Failed to process website content' });
-  }
-});
-
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  logger.info(`Server running on port ${port}`);
 });
