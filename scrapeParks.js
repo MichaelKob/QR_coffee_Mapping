@@ -49,7 +49,7 @@ async function scrapeParks(location) {
     };
 
     // Construct a more specific search URL based on the user's inputted location
-    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks public places')}`;
+    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks beaches lakes outdoor spaces')}`;
     console.log(`Requesting search data from Wikipedia for location: ${location}`);
     const { data: searchData } = await limiter.schedule(() => axios.get(searchUrl));
     console.log('Search Data:', searchData);
@@ -76,7 +76,7 @@ async function scrapeParks(location) {
 
       const placePromises = $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').map(async (index, element) => {
         const placeName = $$(element).text().trim();
-        if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates') && !placeName.toLowerCase().includes('nudity') && !placeName.toLowerCase().includes('episode') && !placeName.toLowerCase().includes('film')) {
+        if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates') && !placeName.toLowerCase().includes('nudity') && !placeName.toLowerCase().includes('episode') && !placeName.toLowerCase().includes('film') && !placeName.toLowerCase().includes('olympics') && !placeName.toLowerCase().includes('committee') && !placeName.toLowerCase().includes('amusement') && !placeName.toLowerCase().includes('metro') && !placeName.toLowerCase().includes('beaches')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
           const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));
@@ -105,7 +105,7 @@ async function scrapeParks(location) {
 
     // Additional fallback: Directly search for places in the location
     if (places.length === 0) {
-      const directSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks beaches lakes')}`;
+      const directSearchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks beaches lakes outdoor spaces')}`;
       console.log(`Requesting direct search data from Wikipedia for location: ${location}`);
       const { data: directSearchData } = await limiter.schedule(() => axios.get(directSearchUrl));
       const $$$ = cheerio.load(directSearchData);
