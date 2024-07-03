@@ -70,7 +70,7 @@ async function scrapeParks(location) {
       const { data: pageData } = await limiter.schedule(() => axios.get(pageLink));
       const $$ = cheerio.load(pageData);
 
-      $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each(async (index, element) => {
+      const placePromises = $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').map(async (index, element) => {
         const placeName = $$(element).text().trim();
         if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates') && !placeName.toLowerCase().includes('nudity') && !placeName.toLowerCase().includes('episode') && !placeName.toLowerCase().includes('film')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
@@ -78,12 +78,15 @@ async function scrapeParks(location) {
           const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));
           if (placeGeocodeData.results && placeGeocodeData.results.length > 0 && placeGeocodeData.results[0].geometry) {
             const placeLocation = placeGeocodeData.results[0].geometry.location;
-            places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
+            return { name: placeName, link: googleMapsLink, location: placeLocation };
           } else {
-            places.push({ name: placeName, link: googleMapsLink });
+            return { name: placeName, link: googleMapsLink };
           }
         }
-      });
+      }).get();
+
+      const extractedPlaces = await Promise.all(placePromises);
+      places.push(...extractedPlaces.filter(Boolean));
 
       console.log('Extracted Places:', places);
 
