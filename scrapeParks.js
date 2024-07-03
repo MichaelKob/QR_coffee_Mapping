@@ -20,6 +20,9 @@ async function scrapeParks(location) {
 
     const filterPlacesWithinCityBounds = (places, cityBounds) => {
       return places.filter(place => {
+        if (!place.location) {
+          return false;
+        }
         const { lat, lng } = place.location;
         return (
           lat >= cityBounds.southwest.lat &&
