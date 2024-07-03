@@ -64,17 +64,24 @@ async function scrapeParks(location) {
     });
     console.log('Search Results:', searchResults);
 
-    // Follow links to extract place names
+    // Follow links to extract place names and fetch location data
     for (const pageLink of searchResults) {
       console.log(`Requesting page data from Wikipedia for link: ${pageLink}`);
       const { data: pageData } = await limiter.schedule(() => axios.get(pageLink));
       const $$ = cheerio.load(pageData);
 
-      $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each((index, element) => {
+      $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each(async (index, element) => {
         const placeName = $$(element).text().trim();
         if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates') && !placeName.toLowerCase().includes('nudity') && !placeName.toLowerCase().includes('episode') && !placeName.toLowerCase().includes('film')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
-          places.push({ name: placeName, link: googleMapsLink });
+          const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
+          const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));
+          if (placeGeocodeData.results && placeGeocodeData.results.length > 0 && placeGeocodeData.results[0].geometry) {
+            const placeLocation = placeGeocodeData.results[0].geometry.location;
+            places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
+          } else {
+            places.push({ name: placeName, link: googleMapsLink });
+          }
         }
       });
 
@@ -96,11 +103,18 @@ async function scrapeParks(location) {
       const { data: directSearchData } = await limiter.schedule(() => axios.get(directSearchUrl));
       const $$$ = cheerio.load(directSearchData);
 
-      $$$('div.mw-search-result-heading a').each((index, element) => {
+      $$$('div.mw-search-result-heading a').each(async (index, element) => {
         const placeName = $(element).text().trim();
         if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
-          places.push({ name: placeName, link: googleMapsLink });
+          const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
+          const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));
+          if (placeGeocodeData.results && placeGeocodeData.results.length > 0 && placeGeocodeData.results[0].geometry) {
+            const placeLocation = placeGeocodeData.results[0].geometry.location;
+            places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
+          } else {
+            places.push({ name: placeName, link: googleMapsLink });
+          }
         }
       });
 
@@ -118,11 +132,18 @@ async function scrapeParks(location) {
         const { data: finalSearchData } = await limiter.schedule(() => axios.get(finalSearchUrl));
         const $$$$ = cheerio.load(finalSearchData);
 
-        $$$$('div.mw-search-result-heading a').each((index, element) => {
+        $$$$('div.mw-search-result-heading a').each(async (index, element) => {
           const placeName = $(element).text().trim();
           if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
-            places.push({ name: placeName, link: googleMapsLink });
+            const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
+            const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));
+            if (placeGeocodeData.results && placeGeocodeData.results.length > 0 && placeGeocodeData.results[0].geometry) {
+              const placeLocation = placeGeocodeData.results[0].geometry.location;
+              places.push({ name: placeName, link: googleMapsLink, location: placeLocation });
+            } else {
+              places.push({ name: placeName, link: googleMapsLink });
+            }
           }
         });
 
