@@ -54,7 +54,7 @@ async function scrapeParks(location) {
     $('div.mw-search-result-heading a').each((index, element) => {
       const pageTitle = $(element).text().trim();
       const pageLink = `https://en.wikipedia.org${$(element).attr('href')}`;
-      if (pageTitle.toLowerCase().includes('list of') || pageTitle.toLowerCase().includes('parks in') || pageTitle.toLowerCase().includes('beaches in') || pageTitle.toLowerCase().includes('lakes in') || pageTitle.toLowerCase().includes('public places in')) {
+      if (pageTitle.toLowerCase().includes('list of') || pageTitle.toLowerCase().includes('parks in') || pageTitle.toLowerCase().includes('beaches in') || pageTitle.toLowerCase().includes('lakes in') || pageTitle.toLowerCase().includes('public places in') || pageTitle.toLowerCase().includes('recreational areas in') || pageTitle.toLowerCase().includes('outdoor spaces in')) {
         searchResults.push(pageLink);
       }
     });
@@ -67,7 +67,7 @@ async function scrapeParks(location) {
 
       $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each((index, element) => {
         const placeName = $$(element).text().trim();
-        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
+        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           places.push({ name: placeName, link: googleMapsLink });
         }
