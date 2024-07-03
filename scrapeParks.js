@@ -29,7 +29,7 @@ async function scrapeParks(location) {
       return places.filter(place => {
         if (!place.location) {
           console.warn(`Place ${place.name} does not have location data.`);
-          return true; // Include places without location data for now
+          return false; // Exclude places without location data
         }
         const { lat, lng } = place.location;
         return (
@@ -41,8 +41,8 @@ async function scrapeParks(location) {
       });
     };
 
-    // Construct a more general search URL based on the user's inputted location
-    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks beaches lakes')}`;
+    // Construct a more specific search URL based on the user's inputted location
+    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks beaches lakes outdoor spaces')}`;
     const { data: searchData } = await limiter.schedule(() => axios.get(searchUrl));
     console.log('Search Data:', searchData);
     const $ = cheerio.load(searchData);
@@ -67,7 +67,7 @@ async function scrapeParks(location) {
 
       $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').each((index, element) => {
         const placeName = $$(element).text().trim();
-        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates')) {
+        if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           places.push({ name: placeName, link: googleMapsLink });
         }
@@ -91,7 +91,7 @@ async function scrapeParks(location) {
 
       $$$('div.mw-search-result-heading a').each((index, element) => {
         const placeName = $(element).text().trim();
-        if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
+        if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           places.push({ name: placeName, link: googleMapsLink });
         }
@@ -112,7 +112,7 @@ async function scrapeParks(location) {
 
         $$$$('div.mw-search-result-heading a').each((index, element) => {
           const placeName = $(element).text().trim();
-          if (placeName && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
+          if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state')) {
             const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
             places.push({ name: placeName, link: googleMapsLink });
           }
