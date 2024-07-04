@@ -104,6 +104,13 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('premium outlets') &&
           !placeName.toLowerCase().includes('ferry terminal') &&
           !placeName.toLowerCase().includes('convention center') &&
+          !placeName.toLowerCase().includes('shopping') &&
+          !placeName.toLowerCase().includes('mall') &&
+          !placeName.toLowerCase().includes('stadium') &&
+          !placeName.toLowerCase().includes('arena') &&
+          !placeName.toLowerCase().includes('theater') &&
+          !placeName.toLowerCase().includes('cinema') &&
+          !placeName.toLowerCase().includes('zoo') &&
           placeName.toLowerCase() !== location.toLowerCase()
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
