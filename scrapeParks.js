@@ -113,6 +113,10 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('theater') &&
           !placeName.toLowerCase().includes('cinema') &&
           !placeName.toLowerCase().includes('zoo') &&
+          !placeName.toLowerCase().includes('entertainment district') &&
+          !placeName.toLowerCase().includes('sports complex') &&
+          !placeName.toLowerCase().includes('industrial park') &&
+          !placeName.toLowerCase().includes('business park') &&
           placeName.toLowerCase() !== location.toLowerCase()
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
