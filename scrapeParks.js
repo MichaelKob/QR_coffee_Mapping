@@ -93,7 +93,9 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('olympics') &&
           !placeName.toLowerCase().includes('committee') &&
           !placeName.toLowerCase().includes('amusement') &&
+          !placeName.toLowerCase().includes('theme park') &&
           !placeName.toLowerCase().includes('metro') &&
+          !placeName.toLowerCase().includes('multistorey car park') &&
           !placeName.toLowerCase().includes('beaches') &&
           !placeName.toLowerCase().includes('nude') &&
           !placeName.toLowerCase().includes('clothing-optional') &&
