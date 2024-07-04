@@ -96,7 +96,9 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('metro') &&
           !placeName.toLowerCase().includes('beaches') &&
           !placeName.toLowerCase().includes('nude') &&
-          !placeName.toLowerCase().includes('clothing-optional')
+          !placeName.toLowerCase().includes('clothing-optional') &&
+          !placeName.toLowerCase().includes('recreation') &&
+          !placeName.toLowerCase().includes('recreational')
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
