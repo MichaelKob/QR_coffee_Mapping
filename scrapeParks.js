@@ -100,6 +100,10 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('recreation') &&
           !placeName.toLowerCase().includes('recreational') &&
           !placeName.toLowerCase().includes('nude recreation') &&
+          !placeName.toLowerCase().includes('airport') &&
+          !placeName.toLowerCase().includes('premium outlets') &&
+          !placeName.toLowerCase().includes('ferry terminal') &&
+          !placeName.toLowerCase().includes('convention center') &&
           placeName.toLowerCase() !== location.toLowerCase()
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
