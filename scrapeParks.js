@@ -119,7 +119,11 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('business park') &&
           placeName.toLowerCase() !== location.toLowerCase() &&
           !placeName.toLowerCase().includes('clothing-optional activities') &&
-          !placeName.toLowerCase().includes('lake keowee')
+          !placeName.toLowerCase().includes('lake keowee') &&
+          !placeName.toLowerCase().includes('freedom to roam') &&
+          !placeName.toLowerCase().includes('right of public access') &&
+          !placeName.toLowerCase().includes('shakespeare in the park festivals') &&
+          !placeName.toLowerCase().includes('history of the national park service')
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
