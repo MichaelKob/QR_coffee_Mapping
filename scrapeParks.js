@@ -49,7 +49,7 @@ async function scrapeParks(location) {
     };
 
     // Construct a more specific search URL based on the user's inputted location
-    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' parks beaches lakes outdoor spaces')}`;
+    const searchUrl = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(location + ' public parks beaches lakes outdoor spaces')}`;
     console.log(`Requesting search data from Wikipedia for location: ${location}`);
     const { data: searchData } = await limiter.schedule(() => axios.get(searchUrl));
     console.log('Search Data:', searchData);
@@ -62,7 +62,7 @@ async function scrapeParks(location) {
     $('div.mw-search-result-heading a').each((index, element) => {
       const pageTitle = $(element).text().trim();
       const pageLink = `https://en.wikipedia.org${$(element).attr('href')}`;
-      if (pageTitle.toLowerCase().includes('parks in') || pageTitle.toLowerCase().includes('public places in') || pageTitle.toLowerCase().includes('recreational areas in') || pageTitle.toLowerCase().includes('outdoor spaces in')) {
+      if (pageTitle.toLowerCase().includes(location.toLowerCase()) && (pageTitle.toLowerCase().includes('parks') || pageTitle.toLowerCase().includes('public places') || pageTitle.toLowerCase().includes('recreational areas') || pageTitle.toLowerCase().includes('outdoor spaces'))) {
         searchResults.push(pageLink);
       }
     });
