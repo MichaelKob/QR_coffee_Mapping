@@ -76,7 +76,49 @@ async function scrapeParks(location) {
 
       const placePromises = $$('div.mw-category-group ul li a, div.mw-parser-output ul li a').map(async (index, element) => {
         const placeName = $$(element).text().trim();
-        if (placeName && placeName.length > 2 && !placeName.match(/^\[\d+\]$/) && !placeName.toLowerCase().includes('list of') && !placeName.toLowerCase().includes('department') && !placeName.toLowerCase().includes('state') && !placeName.toLowerCase().includes('portal') && !placeName.toLowerCase().includes('kml') && !placeName.toLowerCase().includes('gpx') && !placeName.toLowerCase().includes('coordinates') && !placeName.toLowerCase().includes('nudity') && !placeName.toLowerCase().includes('episode') && !placeName.toLowerCase().includes('film') && !placeName.toLowerCase().includes('olympics') && !placeName.toLowerCase().includes('committee') && !placeName.toLowerCase().includes('amusement') && !placeName.toLowerCase().includes('metro') && !placeName.toLowerCase().includes('beaches')) {
+        if (
+          placeName &&
+          placeName.length > 2 &&
+          !placeName.match(/^\[\d+\]$/) &&
+          !placeName.toLowerCase().includes('list of') &&
+          !placeName.toLowerCase().includes('department') &&
+          !placeName.toLowerCase().includes('state') &&
+          !placeName.toLowerCase().includes('portal') &&
+          !placeName.toLowerCase().includes('kml') &&
+          !placeName.toLowerCase().includes('gpx') &&
+          !placeName.toLowerCase().includes('coordinates') &&
+          !placeName.toLowerCase().includes('nudity') &&
+          !placeName.toLowerCase().includes('episode') &&
+          !placeName.toLowerCase().includes('film') &&
+          !placeName.toLowerCase().includes('olympics') &&
+          !placeName.toLowerCase().includes('committee') &&
+          !placeName.toLowerCase().includes('amusement') &&
+          !placeName.toLowerCase().includes('theme park') &&
+          !placeName.toLowerCase().includes('metro') &&
+          !placeName.toLowerCase().includes('multistorey car park') &&
+          !placeName.toLowerCase().includes('beaches') &&
+          !placeName.toLowerCase().includes('nude') &&
+          !placeName.toLowerCase().includes('clothing-optional') &&
+          !placeName.toLowerCase().includes('recreation') &&
+          !placeName.toLowerCase().includes('recreational') &&
+          !placeName.toLowerCase().includes('nude recreation') &&
+          !placeName.toLowerCase().includes('airport') &&
+          !placeName.toLowerCase().includes('premium outlets') &&
+          !placeName.toLowerCase().includes('ferry terminal') &&
+          !placeName.toLowerCase().includes('convention center') &&
+          !placeName.toLowerCase().includes('shopping') &&
+          !placeName.toLowerCase().includes('mall') &&
+          !placeName.toLowerCase().includes('stadium') &&
+          !placeName.toLowerCase().includes('arena') &&
+          !placeName.toLowerCase().includes('theater') &&
+          !placeName.toLowerCase().includes('cinema') &&
+          !placeName.toLowerCase().includes('zoo') &&
+          !placeName.toLowerCase().includes('entertainment district') &&
+          !placeName.toLowerCase().includes('sports complex') &&
+          !placeName.toLowerCase().includes('industrial park') &&
+          !placeName.toLowerCase().includes('business park') &&
+          placeName.toLowerCase() !== location.toLowerCase()
+        ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
           const { data: placeGeocodeData } = await limiter.schedule(() => axios.get(geocodePlaceUrl));

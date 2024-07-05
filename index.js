@@ -20,7 +20,13 @@ const logger = winston.createLogger({
   ]
 });
 
-app.use(cors());
+// Configure CORS to allow requests from the Netlify frontend
+const corsOptions = {
+  origin: ['https://beamish-meringue-54ac84.netlify.app', 'https://ephemeral-granita-771a69.netlify.app', 'https://coruscating-swan-0ff912.netlify.app', 'https://eloquent-meerkat-e7c2a0.netlify.app'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const cache = {};
