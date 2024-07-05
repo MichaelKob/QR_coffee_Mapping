@@ -11,10 +11,10 @@ const limiter = new Bottleneck({
 async function scrapeParks(location) {
   console.log(`Starting scrapeParks for location: ${location}`);
   try {
-    // if (cache.has(location)) {
-    //   console.log(`Serving from cache for location: ${location}`);
-    //   return cache.get(location);
-    // }
+    if (cache.has(location)) {
+      console.log(`Serving from cache for location: ${location}`);
+      return cache.get(location);
+    }
 
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`;
