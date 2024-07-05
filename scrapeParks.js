@@ -123,7 +123,10 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('freedom to roam') &&
           !placeName.toLowerCase().includes('right of public access') &&
           !placeName.toLowerCase().includes('shakespeare in the park festivals') &&
-          !placeName.toLowerCase().includes('history of the national park service')
+          !placeName.toLowerCase().includes('history of the national park service') &&
+          !placeName.toLowerCase().includes('woodland park zoo') &&
+          !placeName.toLowerCase().includes('millennium park') &&
+          !placeName.toLowerCase().includes('amusement park')
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;

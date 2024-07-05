@@ -32,6 +32,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Middleware to set CORS headers for all responses
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 const cache = {};
 
 app.get('/search', async (req, res) => {
@@ -55,7 +61,6 @@ app.get('/search', async (req, res) => {
     // Cache the results
     cache[location] = topResults;
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json({ results: topResults });
   } catch (error) {
     logger.error('Error fetching search results:', error);
