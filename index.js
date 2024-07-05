@@ -20,10 +20,13 @@ const logger = winston.createLogger({
   ]
 });
 
-// Configure CORS to allow requests from the Netlify frontend
+// Configure CORS to allow requests from the Netlify deployment
 const corsOptions = {
-  origin: ['https://beamish-meringue-54ac84.netlify.app', 'https://ephemeral-granita-771a69.netlify.app', 'https://coruscating-swan-0ff912.netlify.app', 'https://eloquent-meerkat-e7c2a0.netlify.app'],
-  optionsSuccessStatus: 200
+  origin: 'https://bright-tartufo-7371ea.netlify.app',
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -52,6 +55,7 @@ app.get('/search', async (req, res) => {
     // Cache the results
     cache[location] = topResults;
 
+    res.setHeader('Access-Control-Allow-Origin', 'https://bright-tartufo-7371ea.netlify.app');
     res.json({ results: topResults });
   } catch (error) {
     logger.error('Error fetching search results:', error);
