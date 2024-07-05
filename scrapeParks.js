@@ -4,7 +4,7 @@ const Bottleneck = require('bottleneck');
 const cache = new Map();
 
 const limiter = new Bottleneck({
-  minTime: 4000, // Minimum time between requests in milliseconds
+  minTime: 2000, // Minimum time between requests in milliseconds
   maxConcurrent: 1, // Maximum number of concurrent requests
 });
 
@@ -117,7 +117,8 @@ async function scrapeParks(location) {
           !placeName.toLowerCase().includes('sports complex') &&
           !placeName.toLowerCase().includes('industrial park') &&
           !placeName.toLowerCase().includes('business park') &&
-          placeName.toLowerCase() !== location.toLowerCase()
+          placeName.toLowerCase() !== location.toLowerCase() &&
+          !placeName.toLowerCase().includes('clothing-optional activities')
         ) {
           const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' ' + location)}`;
           const geocodePlaceUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName + ' ' + location)}&key=${apiKey}`;
