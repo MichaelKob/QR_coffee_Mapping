@@ -22,7 +22,7 @@ const logger = winston.createLogger({
 
 // Configure CORS to allow requests from the Netlify deployment
 const corsOptions = {
-  origin: 'https://bright-tartufo-7371ea.netlify.app',
+  origin: 'https://vocal-seahorse-6a9afa.netlify.app',
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -55,7 +55,7 @@ app.get('/search', async (req, res) => {
     // Cache the results
     cache[location] = topResults;
 
-    res.setHeader('Access-Control-Allow-Origin', 'https://bright-tartufo-7371ea.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://vocal-seahorse-6a9afa.netlify.app');
     res.json({ results: topResults });
   } catch (error) {
     logger.error('Error fetching search results:', error);
