@@ -20,9 +20,9 @@ const logger = winston.createLogger({
   ]
 });
 
-// Configure CORS to allow requests from the Netlify deployment
+// Configure CORS to allow requests from any origin
 const corsOptions = {
-  origin: 'https://vocal-seahorse-6a9afa.netlify.app',
+  origin: '*',
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -55,7 +55,7 @@ app.get('/search', async (req, res) => {
     // Cache the results
     cache[location] = topResults;
 
-    res.setHeader('Access-Control-Allow-Origin', 'https://vocal-seahorse-6a9afa.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json({ results: topResults });
   } catch (error) {
     logger.error('Error fetching search results:', error);
