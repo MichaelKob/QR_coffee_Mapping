@@ -45,7 +45,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      <LoadScript googleMapsApiKey="AIzaSyDXJtwF2zxznMRB1PwzwVkJfQCLXr21nWQ" libraries={libraries}>
+      <LoadScript googleMapsApiKey="AIzaSyC1VZovf-APD8GfC-8a7kAx28U8Ure-RDI" libraries={libraries}>
         <Box className="App" display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh" p={4}>
           <header className="App-header">
             <Text fontSize="3xl" mb={6}>
